@@ -1,4 +1,4 @@
-package com.example.quoteservice.model;
+package main.java.com.example.quoteotd.model; // CORRECTED PACKAEG
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

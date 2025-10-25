@@ -1,0 +1,38 @@
+name: Java CI with Maven
+
+# 1. Pipeline Trigger
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest # uses standard Linux runner environment
+
+    steps:
+    # 2.Checkout Code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 3. Set up java env
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17' 
+        distribution: 'temurin'
+        cache: 'maven'
+
+    # 4. Compile, Test, and Build (The Core Steps)
+    # This runs 'package' goal against the pom.xml in QuoteOTD folder.
+    - name: Build with Maven
+      run: mvn -B package --file QuoteOTD/pom.xml
+      
+    # 5. Archive the built artifact (the executable JAR)
+    - name: Upload JAR Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: quote-otd-jar
+        path: QuoteOTD/target/*.jar
+        retention-days: 5
