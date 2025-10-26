@@ -27,12 +27,13 @@ jobs:
     # 4. Compile, Test, and Build (The Core Steps)
     # This runs 'package' goal against the pom.xml in QuoteOTD folder.
     - name: Build with Maven
-      run: mvn -B package --file QuoteOTD/pom.xml
+      run: mvn -B package --file pom.xml
       
     # 5. Archive the built artifact (the executable JAR)
     - name: Upload JAR Artifact
       uses: actions/upload-artifact@v4
       with:
         name: quote-otd-jar
-        path: QuoteOTD/target/*.jar 
+        # The JAR is now likely in target/
+        path: target/*.jar 
         retention-days: 5
