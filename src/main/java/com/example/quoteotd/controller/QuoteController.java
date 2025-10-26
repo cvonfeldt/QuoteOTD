@@ -1,4 +1,4 @@
-package main.java.com.example.quoteotd.controller;
+package com.example.quoteotd.controller;
 
 import com.example.quoteotd.model.Quote;
 import com.example.quoteotd.repository.QuoteRepository;

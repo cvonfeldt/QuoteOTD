@@ -1,6 +1,6 @@
-package main.java.com.example.quoteotd.repository;
+package com.example.quoteotd.repository;
 
-import com.example.quoteservice.model.Quote;
+import com.example.quoteotd.model.Quote;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;

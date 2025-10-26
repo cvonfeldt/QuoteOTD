@@ -1,4 +1,4 @@
-package main.java.com.example.quoteotd; // This is your root package
+package com.example.quoteotd; // This is your root package
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
