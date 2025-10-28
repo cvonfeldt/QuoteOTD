@@ -15,4 +15,10 @@
 - JPA/Hibernate
 - CI/CD github actions intergrated
 
+## Challenges 
+- **CI/CD Path Issues** - GitHub Actions workflow had incorrect file paths causing build failures
+- **Maven Build Failures** - Incomplete pom.xml prevented successful CI builds
+- **Package Structure Conflicts** - Wrong Java package declarations caused compilation errors in CI
+- **Database Initialization** - H2 database setup issues in GitHub Actions environment
+
 
