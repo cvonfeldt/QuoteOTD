@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote of the Day</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        
+        .quote-box {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            min-height: 150px;
+        }
+        
+        .quote-text {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        
+        .quote-author {
+            font-size: 1.2em;
+            color: #667eea;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #653a8b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+        
+        .btn-tertiary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-tertiary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .search-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1em;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .quotes-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .quote-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quote-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        
+        .error {
+            color: #e53e3e;
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 Quote of the Day</h1>
+        
+        <div class="quote-box" id="quoteBox">
+            <div class="quote-text" id="quoteText">Click "Get Random Quote" to start!</div>
+            <div class="quote-author" id="quoteAuthor"></div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn-primary" onclick="getRandomQuote()">🎲 Get Random Quote</button>
+            <button class="btn-secondary" onclick="getAllQuotes()">📚 View All Quotes</button>
+            <button class="btn-tertiary" onclick="getAllAuthors()">✍️ View All Authors</button>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="authorSearch" placeholder="Search for an author...">
+            <button class="btn-primary" onclick="searchAuthor()">🔍 Search</button>
+        </div>
+        
+        <div class="quotes-list" id="quotesList"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        async function getRandomQuote() {
+            try {
+                document.getElementById('quotesList').innerHTML = '';
+                const response = await fetch(`${API_BASE}/quotes/random`);
+                if (!response.ok) throw new Error('Failed to fetch quote');
+                
+                const quote = await response.json();
+                displayQuote(quote);
+            } catch (error) {
+                showError('Error fetching random quote: ' + error.message);
+            }
+        }
+
+        async function getAllQuotes() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/quotes`);
+                if (!response.ok) throw new Error('Failed to fetch quotes');
+                
+                const quotes = await response.json();
+                displayQuotesList(quotes, 'All Quotes');
+            } catch (error) {
+                showError('Error fetching quotes: ' + error.message);
+            }
+        }
+
+        async function getAllAuthors() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/authors`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch authors (${response.status})`);
+                }
+                
+                const authors = await response.json();
+                console.log('Authors received:', authors);
+                
+                // Check if it's an array of objects or strings
+                if (Array.isArray(authors) && authors.length > 0) {
+                    if (typeof authors[0] === 'string') {
+                        // Array of author names
+                        displayAuthorsListSimple(authors);
+                    } else {
+                        // Array of author objects
+                        displayAuthorsList(authors);
+                    }
+                } else {
+                    showError('No authors found in the database');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error fetching authors: ' + error.message);
+            }
+        }
+
+        async function searchAuthor() {
+            const searchTerm = document.getElementById('authorSearch').value.trim();
+            if (!searchTerm) {
+                showError('Please enter an author name to search');
+                return;
+            }
+
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/authors/search?name=${encodeURIComponent(searchTerm)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Search failed (${response.status})`);
+                }
+                
+                const authors = await response.json();
+                console.log('Search results:', authors);
+                
+                if (!authors || authors.length === 0) {
+                    showError(`No authors found matching "${searchTerm}"`);
+                    return;
+                }
+                
+                // Check if it's an array of objects or strings
+                if (typeof authors[0] === 'string') {
+                    // Show matching author names
+                    displayAuthorsListSimple(authors);
+                } else {
+                    // Show matching author objects
+                    displayAuthorsList(authors);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error searching authors: ' + error.message);
+            }
+        }
+
+        async function getQuotesByAuthor(authorName) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/quotes/author/${encodeURIComponent(authorName)}`);
+                if (!response.ok) throw new Error('Failed to fetch quotes');
+                
+                const quotes = await response.json();
+                displayQuotesList(quotes, `Quotes by ${authorName}`);
+            } catch (error) {
+                showError('Error fetching quotes by author: ' + error.message);
+            }
+        }
+
+        function displayQuote(quote) {
+            const authorName = quote.author ? (quote.author.name || quote.author) : 'Unknown';
+            document.getElementById('quoteText').textContent = `"${quote.text}"`;
+            document.getElementById('quoteAuthor').textContent = `— ${authorName}`;
+        }
+
+        function displayQuotesList(quotes, title) {
+            const listContainer = document.getElementById('quotesList');
+            
+            let html = `<h3 style="color: #667eea; margin: 20px 0;">${title} (${quotes.length})</h3>`;
+            quotes.forEach(quote => {
+                const authorName = quote.author ? (quote.author.name || quote.author) : 'Unknown';
+                // Create a simpler quote object for the onclick to avoid issues
+                const simpleQuote = {
+                    id: quote.id,
+                    text: quote.text,
+                    author: { name: authorName }
+                };
+                html += `
+                    <div class="quote-item" onclick='displayQuoteFromList(${JSON.stringify(simpleQuote).replace(/'/g, "&#39;")})'>
+                        <div style="font-style: italic; margin-bottom: 5px;">"${quote.text}"</div>
+                        <div style="color: #667eea; font-weight: 600;">— ${authorName}</div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function displayQuoteFromList(quote) {
+            document.getElementById('quoteText').textContent = `"${quote.text}"`;
+            document.getElementById('quoteAuthor').textContent = `— ${quote.author.name}`;
+        }
+
+        function displayAuthorsList(authors) {
+            const listContainer = document.getElementById('quotesList');
+            
+            let html = `<h3 style="color: #667eea; margin: 20px 0;">All Authors (${authors.length})</h3>`;
+            authors.forEach(author => {
+                const authorName = author.name || author;
+                const bio = author.biography ? `<div style="font-size: 0.85em; color: #666; margin-top: 5px;">${author.biography}</div>` : '';
+                const nationality = author.nationality ? `<span style="color: #888; font-size: 0.9em;"> • ${author.nationality}</span>` : '';
+                
+                html += `
+                    <div class="quote-item" onclick="getQuotesByAuthor('${authorName}')">
+                        <div style="font-weight: 600; color: #667eea;">✍️ ${authorName}${nationality}</div>
+                        ${bio}
+                        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Click to view quotes</div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function displayAuthorsListSimple(authors) {
+            const listContainer = document.getElementById('quotesList');
+            
+            let html = `<h3 style="color: #667eea; margin: 20px 0;">All Authors (${authors.length})</h3>`;
+            authors.forEach(author => {
+                html += `
+                    <div class="quote-item" onclick="getQuotesByAuthor('${author}')">
+                        <div style="font-weight: 600; color: #667eea;">✍️ ${author}</div>
+                        <div style="font-size: 0.9em; color: #666;">Click to view quotes</div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function showLoading() {
+            document.getElementById('quotesList').innerHTML = '<div class="loading">Loading...</div>';
+        }
+
+        function showError(message) {
+            document.getElementById('quotesList').innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Load a random quote on page load
+        window.onload = () => getRandomQuote();
+    </script>
+</body>
+</html>

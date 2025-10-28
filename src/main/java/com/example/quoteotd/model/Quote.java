@@ -1,31 +1,34 @@
 package com.example.quoteotd.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Entity // 1. Marks this class as a JPA entity, mapping it to a database table.
+@Entity
 public class Quote {
 
-    @Id // 2. Designates 'id' as the primary key.
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 3. Configures ID generation (auto-increment).
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private String text; // Mapped to a column named 'text'
-    private String author; // Mapped to a column named 'author'
+    @Column(length = 1000)
+    private String text;
+    
+    // Many quotes can belong to one author
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "author_id")
+    @JsonIgnoreProperties("quotes") // Prevents infinite recursion when serializing
+    private Author author;
 
-    // Required by JPA specification for persistence frameworks
+    // Constructors
     public Quote() {
     }
 
-    // Constructor for easy data initialization
-    public Quote(String text, String author) {
+    public Quote(String text, Author author) {
         this.text = text;
         this.author = author;
     }
 
-    // --- Getters and Setters ---
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -42,21 +45,20 @@ public class Quote {
         this.text = text;
     }
 
-    public String getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(Author author) {
         this.author = author;
     }
 
-    // Optional: toString() for logging/debugging
     @Override
     public String toString() {
         return "Quote{" +
                 "id=" + id +
                 ", text='" + text + '\'' +
-                ", author='" + author + '\'' +
+                ", author=" + (author != null ? author.getName() : "null") +
                 '}';
     }
 }
