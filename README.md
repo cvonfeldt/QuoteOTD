@@ -15,6 +15,7 @@
 - H2 Database
 - JPA/Hibernate
 - CI/CD github actions intergrated
+- While the app is visually one page, the communication between browser (the client) and the Spring Boot server (the backend) happens through a collection of distinct **API endpoints**, each serving a specific data request.
 
 ## Challenges 
 - **CI/CD Path Issues** - GitHub Actions workflow had incorrect file paths causing build failures
